@@ -3,10 +3,12 @@
 this is a fork of [esp32/esp8266 MCP2515 CAN interface library](https://github.com/dedalqq/esp32-mcp2515) and 
 adds the spi_device_handler_t initial configuration for ESP32 SIM800.
 
+```C++
 #define MISO  19
 #define MOSI  23
 #define SCK   18
 #define SS    5
+```
 
 Thanks to [dedalqq](https://github.com/dedalqq) for the fork.
 
