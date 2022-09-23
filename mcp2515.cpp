@@ -5,6 +5,13 @@
 
 #include "mcp2515.h"
 
+// ESP32 SIM800 Specific (ESP32SIM800):
+#define MISO  19
+#define MOSI  23
+#define SCK   18
+#define SS    5
+// ESP32SIM800 END
+
 const struct MCP2515::TXBn_REGS MCP2515::TXB[MCP2515::N_TXBUFFERS] = {
     {MCP_TXB0CTRL, MCP_TXB0SIDH, MCP_TXB0DATA},
     {MCP_TXB1CTRL, MCP_TXB1SIDH, MCP_TXB1DATA},
@@ -19,6 +26,29 @@ const struct MCP2515::RXBn_REGS MCP2515::RXB[N_RXBUFFERS] = {
 MCP2515::MCP2515(spi_device_handle_t *s)
 {
     spi = s;
+    // ESP32SIM800 START
+    esp_err_t ret;
+    spi_bus_config_t buscfg={};
+    buscfg.miso_io_num=MISO;
+    buscfg.mosi_io_num=MOSI;
+    buscfg.sclk_io_num=SCK;
+    buscfg.quadwp_io_num=-1;
+    buscfg.quadhd_io_num=-1;  
+
+    spi_device_interface_config_t devcfg={};
+
+    devcfg.clock_speed_hz=1*1000*1000,               //Clock out at 1 MHz
+    devcfg.mode=0,                                   
+    devcfg.spics_io_num=SS,                          //Chip select
+    devcfg.queue_size=7,
+                           
+    //Initialize the SPI bus
+    ret=spi_bus_initialize(HSPI_HOST, &buscfg, 1);
+    assert(ret==ESP_OK);
+    //Attach the MCP2515 to the SPI bus
+    ret=spi_bus_add_device(HSPI_HOST, &devcfg, &*spi);
+    assert(ret==ESP_OK);
+    // ESP32SIM800 END 
 }
 
 MCP2515::ERROR MCP2515::reset(void)
